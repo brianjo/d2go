@@ -18,6 +18,10 @@ jobs:
         sudo apt-get install -y python-setuptools
         python3 -m pip install --upgrade pip
         python3 -m pip install setuptools
+        python3 -m pip install torch
+        python3 -m pip install -e git+https://github.com/facebookresearch/detectron2.git#egg=detectron2
+        python3 -m pip install -e git+https://github.com/facebookresearch/mobile-vision.git#egg=mobile_cv
+        python3 -m pip install .
       id: build
     - name: Build the docset
       run: | 
