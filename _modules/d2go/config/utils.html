@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.config.utils &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">d2go</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">d2go.config.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for d2go.config.utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">from</span> <span class="nn">d2go.registry.builtin</span> <span class="kn">import</span> <span class="n">CONFIG_UPDATER_REGISTRY</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.common.misc.oss_utils</span> <span class="kn">import</span> <span class="n">fb_overwritable</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">DEFAULTS_KEY</span> <span class="o">=</span> <span class="s2">&quot;_DEFAULTS_&quot;</span>
+
+
+<div class="viewcode-block" id="reroute_config_path"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.reroute_config_path">[docs]</a><span class="k">def</span> <span class="nf">reroute_config_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Supporting rerouting the config files for convenience:</span>
+<span class="sd">        d2go:// -&gt; mobile-vision/d2go/...</span>
+<span class="sd">        detectron2go:// -&gt; mobile-vision/d2go/configs/...</span>
+<span class="sd">        detectron2:// -&gt; vision/fair/detectron2/configs/...</span>
+<span class="sd">    Those config are considered as code, so they&#39;ll reflect your current checkout,</span>
+<span class="sd">        try using canary if you have local changes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="n">path</span>
+
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;d2go://&quot;</span><span class="p">):</span>
+        <span class="n">rel_path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;d2go://&quot;</span><span class="p">)</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s2">&quot;d2go&quot;</span><span class="p">,</span> <span class="n">rel_path</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;detectron2go://&quot;</span><span class="p">):</span>
+        <span class="n">rel_path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;detectron2go://&quot;</span><span class="p">)</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+            <span class="s2">&quot;d2go&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;configs&quot;</span><span class="p">,</span> <span class="n">rel_path</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;detectron2://&quot;</span><span class="p">):</span>
+        <span class="n">rel_path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;detectron2://&quot;</span><span class="p">)</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+            <span class="s2">&quot;detectron2.model_zoo&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;configs&quot;</span><span class="p">,</span> <span class="n">rel_path</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">reroute_fb_config_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reroute_fb_config_path"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.reroute_fb_config_path">[docs]</a><span class="nd">@fb_overwritable</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">reroute_fb_config_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="flatten_config_dict"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.flatten_config_dict">[docs]</a><span class="k">def</span> <span class="nf">flatten_config_dict</span><span class="p">(</span><span class="n">dic</span><span class="p">,</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flattens nested dict into single layer dict, for example:</span>
+<span class="sd">        flatten_config_dict({</span>
+<span class="sd">            &quot;MODEL&quot;: {</span>
+<span class="sd">                &quot;FBNET_V2&quot;: {</span>
+<span class="sd">                    &quot;ARCH_DEF&quot;: &quot;val0&quot;,</span>
+<span class="sd">                    &quot;ARCH&quot;: &quot;val1:,</span>
+<span class="sd">                },</span>
+<span class="sd">            }</span>
+<span class="sd">        })</span>
+<span class="sd">        =&gt; {&quot;MODEL.FBNET_V2.ARCH_DEF&quot;: &quot;val0&quot;, &quot;MODEL.FBNET_V2.ARCH&quot;: &quot;val1&quot;}</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dic (dict or CfgNode): a nested dict whose keys are strings.</span>
+<span class="sd">        reorder (bool): if True, the returned dict will be sorted according to the keys;</span>
+<span class="sd">            otherwise original order will be preserved.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dic: a single-layer dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_flatten_config_dict</span><span class="p">(</span><span class="n">dic</span><span class="p">,</span> <span class="n">reorder</span><span class="o">=</span><span class="n">reorder</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_flatten_config_dict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">reorder</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">prefix</span><span class="p">:</span> <span class="n">x</span><span class="p">}</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">reorder</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">prefix</span> <span class="k">else</span> <span class="n">k</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_flatten_config_dict</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">reorder</span><span class="p">,</span> <span class="n">new_key</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<div class="viewcode-block" id="config_dict_to_list_str"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.config_dict_to_list_str">[docs]</a><span class="k">def</span> <span class="nf">config_dict_to_list_str</span><span class="p">(</span><span class="n">config_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Creates a list of str given configuration dict</span>
+
+<span class="sd">    This can be useful to generate pretraining or overwrite opts</span>
+<span class="sd">    in D2Go when a user has config_dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">flatten_config_dict</span><span class="p">(</span><span class="n">config_dict</span><span class="p">)</span>
+    <span class="n">str_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">str_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="n">str_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">str_list</span></div>
+
+
+<div class="viewcode-block" id="get_from_flattened_config_dict"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.get_from_flattened_config_dict">[docs]</a><span class="k">def</span> <span class="nf">get_from_flattened_config_dict</span><span class="p">(</span><span class="n">dic</span><span class="p">,</span> <span class="n">flattened_key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads out a value from the nested config dict using flattened config key (i.e. all</span>
+<span class="sd">    keys from each level put together with &quot;.&quot; separator), the default value is returned</span>
+<span class="sd">    if the flattened key doesn&#39;t exist.</span>
+<span class="sd">    e.g. if the config dict is</span>
+<span class="sd">        MODEL:</span>
+<span class="sd">            TEST:</span>
+<span class="sd">            SCORE_THRESHOLD: 0.7</span>
+<span class="sd">        Then to access the value of SCORE_THRESHOLD, this API should be called</span>
+
+<span class="sd">        &gt;&gt; score_threshold = get_from_flattened_config_dict(cfg, &quot;MODEL.TEST.SCORE_THRESHOLD&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">flattened_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dic</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">default</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="n">dic</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dic</span></div>
+
+
+<div class="viewcode-block" id="get_cfg_diff_table"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.get_cfg_diff_table">[docs]</a><span class="k">def</span> <span class="nf">get_cfg_diff_table</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">original_cfg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print the different of two config dicts side-by-side in a table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">all_old_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flatten_config_dict</span><span class="p">(</span><span class="n">original_cfg</span><span class="p">,</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">all_new_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flatten_config_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="n">diff_table</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">all_old_keys</span> <span class="o">!=</span> <span class="n">all_new_keys</span><span class="p">:</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">mismatched_old_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_old_keys</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_new_keys</span><span class="p">)</span>
+        <span class="n">mismatched_new_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_new_keys</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_old_keys</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Config key mismatched.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Mismatched old keys: </span><span class="si">{</span><span class="n">mismatched_old_keys</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Mismatched new keys: </span><span class="si">{</span><span class="n">mismatched_new_keys</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">old_key</span> <span class="ow">in</span> <span class="n">mismatched_old_keys</span><span class="p">:</span>
+            <span class="n">old_value</span> <span class="o">=</span> <span class="n">get_from_flattened_config_dict</span><span class="p">(</span><span class="n">original_cfg</span><span class="p">,</span> <span class="n">old_key</span><span class="p">)</span>
+            <span class="n">diff_table</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">old_key</span><span class="p">,</span> <span class="n">old_value</span><span class="p">,</span> <span class="s2">&quot;Key not exists&quot;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">new_key</span> <span class="ow">in</span> <span class="n">mismatched_new_keys</span><span class="p">:</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="n">get_from_flattened_config_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">new_key</span><span class="p">)</span>
+            <span class="n">diff_table</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">new_key</span><span class="p">,</span> <span class="s2">&quot;Key not exists&quot;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">])</span>
+
+        <span class="c1"># filter out mis-matched keys</span>
+        <span class="n">all_old_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_old_keys</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mismatched_old_keys</span><span class="p">]</span>
+        <span class="n">all_new_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_new_keys</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mismatched_new_keys</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">full_key</span> <span class="ow">in</span> <span class="n">all_new_keys</span><span class="p">:</span>
+        <span class="n">old_value</span> <span class="o">=</span> <span class="n">get_from_flattened_config_dict</span><span class="p">(</span><span class="n">original_cfg</span><span class="p">,</span> <span class="n">full_key</span><span class="p">)</span>
+        <span class="n">new_value</span> <span class="o">=</span> <span class="n">get_from_flattened_config_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">full_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_value</span> <span class="o">!=</span> <span class="n">new_value</span><span class="p">:</span>
+            <span class="n">diff_table</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">full_key</span><span class="p">,</span> <span class="n">old_value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">])</span>
+
+    <span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">tabulate</span><span class="p">(</span>
+        <span class="n">diff_table</span><span class="p">,</span>
+        <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;pipe&quot;</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;config key&quot;</span><span class="p">,</span> <span class="s2">&quot;old value&quot;</span><span class="p">,</span> <span class="s2">&quot;new value&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">table</span></div>
+
+
+<div class="viewcode-block" id="get_diff_cfg"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.get_diff_cfg">[docs]</a><span class="k">def</span> <span class="nf">get_diff_cfg</span><span class="p">(</span><span class="n">old_cfg</span><span class="p">,</span> <span class="n">new_cfg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    outputs a CfgNode containing keys, values appearing in new_cfg and not in old_cfg.</span>
+<span class="sd">    If `new_allowed` is not set, then new keys will throw a KeyError</span>
+<span class="sd">    old_cfg: CfgNode, the original config, usually the dafulat</span>
+<span class="sd">    new_cfg: CfgNode, the full config being passed by the user</span>
+
+<span class="sd">    if new allowed is not set on new_cfg, key error is raised</span>
+<span class="sd">    returns: CfgNode, a config containing only key, value changes between old_cfg and new_cfg</span>
+
+<span class="sd">    example:</span>
+<span class="sd">        Cfg1:</span>
+<span class="sd">            SYSTEM:</span>
+<span class="sd">                NUM_GPUS: 2</span>
+<span class="sd">            TRAIN:</span>
+<span class="sd">                SCALES: (1, 2)</span>
+<span class="sd">            DATASETS:</span>
+<span class="sd">                train_2017:</span>
+<span class="sd">                    17: 1</span>
+<span class="sd">                    18: 1</span>
+<span class="sd">        Cfg2:</span>
+<span class="sd">            SYSTEM:</span>
+<span class="sd">                NUM_GPUS: 2</span>
+<span class="sd">            TRAIN:</span>
+<span class="sd">                SCALES: (4, 5, 8)</span>
+<span class="sd">            DATASETS:</span>
+<span class="sd">                train_2017:</span>
+<span class="sd">                    17: 1</span>
+<span class="sd">                    18: 1</span>
+
+<span class="sd">        get_diff_cfg(Cfg1, Cfg2) gives:</span>
+<span class="sd">            TRAIN:</span>
+<span class="sd">                SCALES: (8, 16, 32)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_diff_cfg_rec</span><span class="p">(</span><span class="n">old_cfg</span><span class="p">,</span> <span class="n">new_cfg</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">new_cfg</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">is_new_allowed</span><span class="p">():</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">old_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">new_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">new_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+                    <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="vm">__class__</span><span class="p">()</span>
+                    <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_diff_cfg_rec</span><span class="p">(</span><span class="n">old_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">new_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">new_cfg</span><span class="o">.</span><span class="vm">__class__</span><span class="p">()</span>
+    <span class="n">diff_cfg</span> <span class="o">=</span> <span class="n">get_diff_cfg_rec</span><span class="p">(</span><span class="n">old_cfg</span><span class="p">,</span> <span class="n">new_cfg</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+
+    <span class="c1"># Keep the `_DEFAULTS_` even though they should be the same</span>
+    <span class="n">old_defaults</span> <span class="o">=</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULTS_KEY</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">new_defaults</span> <span class="o">=</span> <span class="n">new_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULTS_KEY</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">old_defaults</span> <span class="o">==</span> <span class="n">new_defaults</span>
+    <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">DEFAULTS_KEY</span><span class="si">}</span><span class="s2"> doesn&#39;t match! old (</span><span class="si">{</span><span class="n">old_defaults</span><span class="si">}</span><span class="s2">) vs new (</span><span class="si">{</span><span class="n">new_defaults</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">if</span> <span class="n">new_defaults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">diff_cfg</span><span class="p">[</span><span class="n">DEFAULTS_KEY</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_defaults</span>
+
+    <span class="k">return</span> <span class="n">diff_cfg</span></div>
+
+
+<div class="viewcode-block" id="namedtuple_to_dict"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.namedtuple_to_dict">[docs]</a><span class="k">def</span> <span class="nf">namedtuple_to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert NamedTuple or dataclass to dict so it can be used as config&quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+            <span class="c1"># in case of enum, serialize the enum value</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="resolve_default_config"><a class="viewcode-back" href="../../../d2go.config.html#d2go.config.utils.resolve_default_config">[docs]</a><span class="k">def</span> <span class="nf">resolve_default_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">DEFAULTS_KEY</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cfg</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t resolved default config because `</span><span class="si">{</span><span class="n">DEFAULTS_KEY</span><span class="si">}</span><span class="s2">` is&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; missing from cfg: </span><span class="se">\n</span><span class="si">{</span><span class="n">cfg</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">updater_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">DEFAULTS_KEY</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">updater_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="n">updater_names</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">updater_names</span><span class="p">],</span> <span class="n">updater_names</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resolving default config by applying updaters: </span><span class="si">{</span><span class="n">updater_names</span><span class="si">}</span><span class="s2"> ...&quot;</span><span class="p">)</span>
+    <span class="c1"># starting from a empty CfgNode, sequentially apply the generator</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cfg</span><span class="p">)()</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">updater_names</span><span class="p">:</span>
+        <span class="n">updater</span> <span class="o">=</span> <span class="n">CONFIG_UPDATER_REGISTRY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">updater</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="c1"># the resolved default config should keep the same default generator</span>
+    <span class="n">cfg</span><span class="p">[</span><span class="n">DEFAULTS_KEY</span><span class="p">]</span> <span class="o">=</span> <span class="n">updater_names</span>
+
+    <span class="k">return</span> <span class="n">cfg</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

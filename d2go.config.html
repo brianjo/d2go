@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.config package &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="d2go.data package" href="d2go.data.html" />
+    <link rel="prev" title="d2go.checkpoint package" href="d2go.checkpoint.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">d2go</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="d2go.html">d2go package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="d2go.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="d2go.checkpoint.html">d2go.checkpoint package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">d2go.config package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.html">d2go.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.evaluation.html">d2go.evaluation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.export.html">d2go.export package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.model_zoo.html">d2go.model_zoo package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.html">d2go.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.optimizer.html">d2go.optimizer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.quantization.html">d2go.quantization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.registry.html">d2go.registry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.runner.html">d2go.runner package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.trainer.html">d2go.trainer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.html">d2go.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#d2go-distributed-module">d2go.distributed module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#module-d2go.initializer">d2go.initializer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#d2go-setup-module">d2go.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#module-d2go">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">d2go</a></li>
+          <li class="breadcrumb-item"><a href="d2go.html">d2go package</a></li>
+      <li class="breadcrumb-item active">d2go.config package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/d2go.config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="d2go-config-package">
+<h1>d2go.config package<a class="headerlink" href="#d2go-config-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-d2go.config.config">
+<span id="d2go-config-config-module"></span><h2>d2go.config.config module<a class="headerlink" href="#module-d2go.config.config" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">d2go.config.config.</span></span><span class="sig-name descname"><span class="pre">CfgNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_allowed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CfgNode</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode.cast_from_other_class">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cast_from_other_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.cast_from_other_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode.cast_from_other_class" title="Permalink to this definition"></a></dt>
+<dd><p>Cast an instance of other CfgNode to D2Go’s CfgNode (or its subclass)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode.dump" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a yaml string representation of the config</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode.get_default_cfg">
+<span class="sig-name descname"><span class="pre">get_default_cfg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.get_default_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode.get_default_cfg" title="Permalink to this definition"></a></dt>
+<dd><p>Return the defaults for this instance of CfgNode</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode.load_yaml_with_base">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_yaml_with_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.load_yaml_with_base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode.load_yaml_with_base" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Just like <cite>yaml.load(open(filename))</cite>, but inherit attributes from its</dt><dd><p><cite>_BASE_</cite>.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em><em> or </em><em>file-like object</em>) – the file name or file of the current config.
+Will be used to find the base config file.</p></li>
+<li><p><strong>allow_unsafe</strong> (<em>bool</em>) – whether to allow loading the config file with
+<cite>yaml.unsafe_load</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the loaded yaml</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode.merge_from_file">
+<span class="sig-name descname"><span class="pre">merge_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.merge_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode.merge_from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Load content from the given config file and merge it into self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg_filename</strong> – config filename</p></li>
+<li><p><strong>allow_unsafe</strong> – allow unsafe yaml syntax</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.config.CfgNode.merge_from_list">
+<span class="sig-name descname"><span class="pre">merge_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.merge_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.CfgNode.merge_from_list" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg_list</strong> (<em>list</em>) – list of configs to merge from.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.config.auto_scale_world_size">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.config.</span></span><span class="sig-name descname"><span class="pre">auto_scale_world_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_world_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#auto_scale_world_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.auto_scale_world_size" title="Permalink to this definition"></a></dt>
+<dd><p>Usually the config file is written for a specific number of devices, this method
+scales the config (in-place!) according to the actual world size using the
+pre-registered scaling methods specified as cfg.SOLVER.AUTO_SCALING_METHODS.</p>
+<dl class="simple">
+<dt>Note for registering scaling methods:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>The method will only be called when scaling is needed. It won’t be called</dt><dd><p>if SOLVER.REFERENCE_WORLD_SIZE is 0 or equal to target world size. Thus
+cfg.SOLVER.REFERENCE_WORLD_SIZE will always be positive.</p>
+</dd>
+</dl>
+</li>
+<li><p>The method updates cfg in-place, no return is required.</p></li>
+<li><p>No need for changing SOLVER.REFERENCE_WORLD_SIZE.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="#d2go.config.config.CfgNode" title="d2go.config.config.CfgNode"><em>CfgNode</em></a>) – original config which contains SOLVER.REFERENCE_WORLD_SIZE and
+SOLVER.AUTO_SCALING_METHODS.</p></li>
+<li><p><strong>new_world_size</strong> – the target world size</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.config.load_full_config_from_file">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.config.</span></span><span class="sig-name descname"><span class="pre">load_full_config_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#d2go.config.config.CfgNode" title="d2go.config.config.CfgNode"><span class="pre">CfgNode</span></a></span></span><a class="reference internal" href="_modules/d2go/config/config.html#load_full_config_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.load_full_config_from_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.config.reroute_load_yaml_with_base">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.config.</span></span><span class="sig-name descname"><span class="pre">reroute_load_yaml_with_base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#reroute_load_yaml_with_base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.reroute_load_yaml_with_base" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.config.temp_defrost">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.config.</span></span><span class="sig-name descname"><span class="pre">temp_defrost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#temp_defrost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.temp_defrost" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.config.temp_new_allowed">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.config.</span></span><span class="sig-name descname"><span class="pre">temp_new_allowed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#d2go.config.config.CfgNode" title="d2go.config.config.CfgNode"><span class="pre">CfgNode</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#temp_new_allowed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.config.temp_new_allowed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-d2go.config.utils">
+<span id="d2go-config-utils-module"></span><h2>d2go.config.utils module<a class="headerlink" href="#module-d2go.config.utils" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.config_dict_to_list_str">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">config_dict_to_list_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/d2go/config/utils.html#config_dict_to_list_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.config_dict_to_list_str" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a list of str given configuration dict</p>
+<p>This can be useful to generate pretraining or overwrite opts
+in D2Go when a user has config_dict</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.flatten_config_dict">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">flatten_config_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/utils.html#flatten_config_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.flatten_config_dict" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Flattens nested dict into single layer dict, for example:</dt><dd><dl>
+<dt>flatten_config_dict({</dt><dd><dl>
+<dt>“MODEL”: {</dt><dd><dl class="simple">
+<dt>“FBNET_V2”: {</dt><dd><p>“ARCH_DEF”: “val0”,
+“ARCH”: “val1:,</p>
+</dd>
+</dl>
+<p>},</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>})
+=&gt; {“MODEL.FBNET_V2.ARCH_DEF”: “val0”, “MODEL.FBNET_V2.ARCH”: “val1”}</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dic</strong> (<em>dict</em><em> or </em><a class="reference internal" href="#d2go.config.config.CfgNode" title="d2go.config.config.CfgNode"><em>CfgNode</em></a>) – a nested dict whose keys are strings.</p></li>
+<li><p><strong>reorder</strong> (<em>bool</em>) – if True, the returned dict will be sorted according to the keys;
+otherwise original order will be preserved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a single-layer dict</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dic</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.get_cfg_diff_table">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">get_cfg_diff_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/utils.html#get_cfg_diff_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.get_cfg_diff_table" title="Permalink to this definition"></a></dt>
+<dd><p>Print the different of two config dicts side-by-side in a table</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.get_diff_cfg">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">get_diff_cfg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/utils.html#get_diff_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.get_diff_cfg" title="Permalink to this definition"></a></dt>
+<dd><p>outputs a CfgNode containing keys, values appearing in new_cfg and not in old_cfg.
+If <cite>new_allowed</cite> is not set, then new keys will throw a KeyError
+old_cfg: CfgNode, the original config, usually the dafulat
+new_cfg: CfgNode, the full config being passed by the user</p>
+<p>if new allowed is not set on new_cfg, key error is raised
+returns: CfgNode, a config containing only key, value changes between old_cfg and new_cfg</p>
+<p class="rubric">Example</p>
+<dl class="simple">
+<dt>Cfg1:</dt><dd><dl class="simple">
+<dt>SYSTEM:</dt><dd><p>NUM_GPUS: 2</p>
+</dd>
+<dt>TRAIN:</dt><dd><p>SCALES: (1, 2)</p>
+</dd>
+<dt>DATASETS:</dt><dd><dl class="simple">
+<dt>train_2017:</dt><dd><p>17: 1
+18: 1</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>Cfg2:</dt><dd><dl class="simple">
+<dt>SYSTEM:</dt><dd><p>NUM_GPUS: 2</p>
+</dd>
+<dt>TRAIN:</dt><dd><p>SCALES: (4, 5, 8)</p>
+</dd>
+<dt>DATASETS:</dt><dd><dl class="simple">
+<dt>train_2017:</dt><dd><p>17: 1
+18: 1</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>get_diff_cfg(Cfg1, Cfg2) gives:</dt><dd><dl class="simple">
+<dt>TRAIN:</dt><dd><p>SCALES: (8, 16, 32)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.get_from_flattened_config_dict">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">get_from_flattened_config_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flattened_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/utils.html#get_from_flattened_config_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.get_from_flattened_config_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Reads out a value from the nested config dict using flattened config key (i.e. all
+keys from each level put together with “.” separator), the default value is returned
+if the flattened key doesn’t exist.
+e.g. if the config dict is</p>
+<blockquote>
+<div><dl class="simple">
+<dt>MODEL:</dt><dd><p>TEST:
+SCORE_THRESHOLD: 0.7</p>
+</dd>
+</dl>
+<p>Then to access the value of SCORE_THRESHOLD, this API should be called</p>
+<p>&gt;&gt; score_threshold = get_from_flattened_config_dict(cfg, “MODEL.TEST.SCORE_THRESHOLD”)</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.namedtuple_to_dict">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">namedtuple_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/utils.html#namedtuple_to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.namedtuple_to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Convert NamedTuple or dataclass to dict so it can be used as config</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.reroute_config_path">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">reroute_config_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/d2go/config/utils.html#reroute_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.reroute_config_path" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Supporting rerouting the config files for convenience:</dt><dd><p>d2go:// -&gt; mobile-vision/d2go/…
+detectron2go:// -&gt; mobile-vision/d2go/configs/…
+detectron2:// -&gt; vision/fair/detectron2/configs/…</p>
+</dd>
+<dt>Those config are considered as code, so they’ll reflect your current checkout,</dt><dd><p>try using canary if you have local changes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.reroute_fb_config_path">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">reroute_fb_config_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/d2go/config/utils.html#reroute_fb_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.reroute_fb_config_path" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.utils.resolve_default_config">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.utils.</span></span><span class="sig-name descname"><span class="pre">resolve_default_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/utils.html#resolve_default_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.utils.resolve_default_config" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-d2go.config">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-d2go.config" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="d2go.config.CfgNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">d2go.config.</span></span><span class="sig-name descname"><span class="pre">CfgNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_allowed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CfgNode</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.CfgNode.cast_from_other_class">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cast_from_other_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.cast_from_other_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode.cast_from_other_class" title="Permalink to this definition"></a></dt>
+<dd><p>Cast an instance of other CfgNode to D2Go’s CfgNode (or its subclass)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.CfgNode.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode.dump" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a yaml string representation of the config</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.CfgNode.get_default_cfg">
+<span class="sig-name descname"><span class="pre">get_default_cfg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.get_default_cfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode.get_default_cfg" title="Permalink to this definition"></a></dt>
+<dd><p>Return the defaults for this instance of CfgNode</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.CfgNode.load_yaml_with_base">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_yaml_with_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.load_yaml_with_base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode.load_yaml_with_base" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Just like <cite>yaml.load(open(filename))</cite>, but inherit attributes from its</dt><dd><p><cite>_BASE_</cite>.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em><em> or </em><em>file-like object</em>) – the file name or file of the current config.
+Will be used to find the base config file.</p></li>
+<li><p><strong>allow_unsafe</strong> (<em>bool</em>) – whether to allow loading the config file with
+<cite>yaml.unsafe_load</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the loaded yaml</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.CfgNode.merge_from_file">
+<span class="sig-name descname"><span class="pre">merge_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.merge_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode.merge_from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Load content from the given config file and merge it into self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg_filename</strong> – config filename</p></li>
+<li><p><strong>allow_unsafe</strong> – allow unsafe yaml syntax</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.config.CfgNode.merge_from_list">
+<span class="sig-name descname"><span class="pre">merge_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#CfgNode.merge_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.CfgNode.merge_from_list" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg_list</strong> (<em>list</em>) – list of configs to merge from.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.auto_scale_world_size">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.</span></span><span class="sig-name descname"><span class="pre">auto_scale_world_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_world_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#auto_scale_world_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.auto_scale_world_size" title="Permalink to this definition"></a></dt>
+<dd><p>Usually the config file is written for a specific number of devices, this method
+scales the config (in-place!) according to the actual world size using the
+pre-registered scaling methods specified as cfg.SOLVER.AUTO_SCALING_METHODS.</p>
+<dl class="simple">
+<dt>Note for registering scaling methods:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>The method will only be called when scaling is needed. It won’t be called</dt><dd><p>if SOLVER.REFERENCE_WORLD_SIZE is 0 or equal to target world size. Thus
+cfg.SOLVER.REFERENCE_WORLD_SIZE will always be positive.</p>
+</dd>
+</dl>
+</li>
+<li><p>The method updates cfg in-place, no return is required.</p></li>
+<li><p>No need for changing SOLVER.REFERENCE_WORLD_SIZE.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="#d2go.config.CfgNode" title="d2go.config.CfgNode"><em>CfgNode</em></a>) – original config which contains SOLVER.REFERENCE_WORLD_SIZE and
+SOLVER.AUTO_SCALING_METHODS.</p></li>
+<li><p><strong>new_world_size</strong> – the target world size</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.load_full_config_from_file">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.</span></span><span class="sig-name descname"><span class="pre">load_full_config_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#d2go.config.config.CfgNode" title="d2go.config.config.CfgNode"><span class="pre">CfgNode</span></a></span></span><a class="reference internal" href="_modules/d2go/config/config.html#load_full_config_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.load_full_config_from_file" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.reroute_config_path">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.</span></span><span class="sig-name descname"><span class="pre">reroute_config_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/d2go/config/utils.html#reroute_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.reroute_config_path" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Supporting rerouting the config files for convenience:</dt><dd><p>d2go:// -&gt; mobile-vision/d2go/…
+detectron2go:// -&gt; mobile-vision/d2go/configs/…
+detectron2:// -&gt; vision/fair/detectron2/configs/…</p>
+</dd>
+<dt>Those config are considered as code, so they’ll reflect your current checkout,</dt><dd><p>try using canary if you have local changes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.temp_defrost">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.</span></span><span class="sig-name descname"><span class="pre">temp_defrost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#temp_defrost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.temp_defrost" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.config.temp_new_allowed">
+<span class="sig-prename descclassname"><span class="pre">d2go.config.</span></span><span class="sig-name descname"><span class="pre">temp_new_allowed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#d2go.config.config.CfgNode" title="d2go.config.config.CfgNode"><span class="pre">CfgNode</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/config/config.html#temp_new_allowed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.config.temp_new_allowed" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="d2go.checkpoint.html" class="btn btn-neutral float-left" title="d2go.checkpoint package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="d2go.data.html" class="btn btn-neutral float-right" title="d2go.data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

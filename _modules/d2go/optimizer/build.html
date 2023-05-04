@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.optimizer.build &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">d2go</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">d2go.optimizer.build</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for d2go.optimizer.build</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># FIXME: optimizer should not depend on quantization (or vice versa)</span>
+<span class="kn">from</span> <span class="nn">d2go.quantization.learnable_qat</span> <span class="kn">import</span> <span class="n">iterate_module_named_parameters</span>
+<span class="kn">from</span> <span class="nn">detectron2.solver.build</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">maybe_add_gradient_clipping</span> <span class="k">as</span> <span class="n">d2_maybe_add_gradient_clipping</span><span class="p">,</span>
+    <span class="n">reduce_param_groups</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">detectron2.utils.registry</span> <span class="kn">import</span> <span class="n">Registry</span>
+
+
+<span class="n">D2GO_OPTIM_MAPPER_REGISTRY</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;D2GO_OPTIM_MAPPER&quot;</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">OptimizerModelsType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">parallel</span><span class="o">.</span><span class="n">DistributedDataParallel</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_optimizer_param_groups"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.get_optimizer_param_groups">[docs]</a><span class="k">def</span> <span class="nf">get_optimizer_param_groups</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">OptimizerModelsType</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get override optimizer parameter groups</span>
+<span class="sd">       * Get all default parameters</span>
+<span class="sd">       # Get parameter groups for normalization and bias</span>
+<span class="sd">       # Get parameter groups from model if the model implements `get_optimizer_param_groups()`</span>
+<span class="sd">    Parameters appear later will override parameters appear earlier</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get all parameters that requires gradient</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">get_optimizer_param_groups_default</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># parameter groups for lr</span>
+    <span class="n">params</span> <span class="o">+=</span> <span class="n">get_optimizer_param_groups_lr</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">base_lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BASE_LR</span><span class="p">,</span>
+        <span class="n">bias_lr_factor</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BIAS_LR_FACTOR</span><span class="p">,</span>
+        <span class="n">lr_multipliers_overwrite</span><span class="o">=</span><span class="n">_merge_dict</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">LR_MULTIPLIER_OVERWRITE</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># parameter groups for normalization, bias, and embedding</span>
+    <span class="n">params</span> <span class="o">+=</span> <span class="n">get_optimizer_param_groups_weight_decay</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">weight_decay</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">WEIGHT_DECAY</span><span class="p">,</span>
+        <span class="n">weight_decay_norm</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">WEIGHT_DECAY_NORM</span><span class="p">,</span>
+        <span class="n">weight_decay_bias</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">WEIGHT_DECAY_BIAS</span><span class="p">,</span>
+        <span class="n">weight_decay_embed</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">WEIGHT_DECAY_EMBED</span><span class="p">,</span>
+        <span class="n">weight_decay_overwrite</span><span class="o">=</span><span class="n">_merge_dict</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">WEIGHT_DECAY_OVERWRITE</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># parameter groups from model function `model.get_optimizer_param_groups(opts)`</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">parallel</span><span class="o">.</span><span class="n">DistributedDataParallel</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">module</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;get_optimizer_param_groups&quot;</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Getting optimizer parameter groups from model.get_optimizer_param_groups()&quot;</span>
+        <span class="p">)</span>
+        <span class="n">params</span> <span class="o">+=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_optimizer_param_groups</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">reduce_param_groups</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_optimizer_param_groups_default"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.get_optimizer_param_groups_default">[docs]</a><span class="k">def</span> <span class="nf">get_optimizer_param_groups_default</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">OptimizerModelsType</span><span class="p">):</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">,</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="get_optimizer_param_groups_lr"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.get_optimizer_param_groups_lr">[docs]</a><span class="k">def</span> <span class="nf">get_optimizer_param_groups_lr</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">OptimizerModelsType</span><span class="p">,</span>
+    <span class="n">base_lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">bias_lr_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">lr_multipliers_overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allow setting up lr for modules</span>
+<span class="sd">    base_lr: lr for all modules</span>
+<span class="sd">    bias_lr_factor: scale factor for lr for bias term</span>
+<span class="sd">    lr_multipliers_overwrite (dict: str-&gt; float):</span>
+<span class="sd">        Applying different lr multiplier to a set of parameters whose names</span>
+<span class="sd">        containing certain keys. For example, if lr_multipliers_overwrite={&#39;backbone&#39;: 0.1},</span>
+<span class="sd">        the LR for the parameters whose names containing &#39;backbone&#39; will be scaled to 0.1x.</span>
+<span class="sd">        Set lr_multipliers_overwrite=None if no multipliers required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="p">(</span>
+        <span class="n">module_name</span><span class="p">,</span>
+        <span class="n">_module</span><span class="p">,</span>
+        <span class="n">module_param_name</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">,</span>
+    <span class="p">)</span> <span class="ow">in</span> <span class="n">iterate_module_named_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">cur_lr</span> <span class="o">=</span> <span class="n">base_lr</span>
+        <span class="k">if</span> <span class="n">module_param_name</span> <span class="o">==</span> <span class="s2">&quot;bias&quot;</span><span class="p">:</span>
+            <span class="n">cur_lr</span> <span class="o">=</span> <span class="n">base_lr</span> <span class="o">*</span> <span class="n">bias_lr_factor</span>
+        <span class="k">if</span> <span class="n">lr_multipliers_overwrite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">kname</span><span class="p">,</span> <span class="n">mult</span> <span class="ow">in</span> <span class="n">lr_multipliers_overwrite</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">kname</span> <span class="ow">in</span> <span class="n">module_name</span><span class="p">:</span>
+                    <span class="c1"># apply multiplier for the params containing kname, e.g. backbone</span>
+                    <span class="n">cur_lr</span> <span class="o">=</span> <span class="n">cur_lr</span> <span class="o">*</span> <span class="n">mult</span>
+
+        <span class="n">params</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="p">],</span>
+                <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">cur_lr</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="get_optimizer_param_groups_weight_decay"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.get_optimizer_param_groups_weight_decay">[docs]</a><span class="k">def</span> <span class="nf">get_optimizer_param_groups_weight_decay</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">OptimizerModelsType</span><span class="p">,</span>
+    <span class="n">weight_decay</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">weight_decay_norm</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">weight_decay_bias</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">weight_decay_embed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">weight_decay_overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allow setting up weight decay for normalization, embedding and bias</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">weight_decay_norm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weight_decay_norm</span> <span class="o">=</span> <span class="n">weight_decay</span>
+    <span class="k">if</span> <span class="n">weight_decay_bias</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weight_decay_bias</span> <span class="o">=</span> <span class="n">weight_decay</span>
+    <span class="k">if</span> <span class="n">weight_decay_embed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weight_decay_embed</span> <span class="o">=</span> <span class="n">weight_decay</span>
+
+    <span class="n">norm_module_types</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm3d</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">SyncBatchNorm</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">GroupNorm</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">InstanceNorm1d</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">InstanceNorm2d</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">InstanceNorm3d</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">,</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">LocalResponseNorm</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="p">(</span>
+        <span class="n">_module_name</span><span class="p">,</span>
+        <span class="n">module</span><span class="p">,</span>
+        <span class="n">module_param_name</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">,</span>
+    <span class="p">)</span> <span class="ow">in</span> <span class="n">iterate_module_named_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">cur_wd</span> <span class="o">=</span> <span class="n">weight_decay</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">norm_module_types</span><span class="p">):</span>
+            <span class="n">cur_wd</span> <span class="o">=</span> <span class="n">weight_decay_norm</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">):</span>
+            <span class="n">cur_wd</span> <span class="o">=</span> <span class="n">weight_decay_embed</span>
+        <span class="k">elif</span> <span class="n">module_param_name</span> <span class="o">==</span> <span class="s2">&quot;bias&quot;</span><span class="p">:</span>
+            <span class="n">cur_wd</span> <span class="o">=</span> <span class="n">weight_decay_bias</span>
+        <span class="k">if</span> <span class="n">weight_decay_overwrite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">kname</span><span class="p">,</span> <span class="n">wd</span> <span class="ow">in</span> <span class="n">weight_decay_overwrite</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">kname</span> <span class="ow">in</span> <span class="n">module_param_name</span><span class="p">:</span>
+                    <span class="n">cur_wd</span> <span class="o">=</span> <span class="n">wd</span>
+
+        <span class="k">if</span> <span class="n">cur_wd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="p">],</span>
+                    <span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="n">cur_wd</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="get_optimizer_param_groups_override"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.get_optimizer_param_groups_override">[docs]</a><span class="k">def</span> <span class="nf">get_optimizer_param_groups_override</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">OptimizerModelsType</span><span class="p">,</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allow setting up overrides for parameter groups</span>
+<span class="sd">    overrides (dict: str -&gt; (dict: str -&gt; float)):</span>
+<span class="sd">        if not `None`, provides values for optimizer hyperparameters</span>
+<span class="sd">        (LR, weight decay) for module parameters with a given name; e.g.</span>
+<span class="sd">        {&quot;embedding&quot;: {&quot;lr&quot;: 0.01, &quot;weight_decay&quot;: 0.1}} will set the LR and</span>
+<span class="sd">        weight decay values for all module parameters named `embedding` (default: None)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">overrides</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="k">for</span> <span class="p">(</span>
+        <span class="n">_module_name</span><span class="p">,</span>
+        <span class="n">_module</span><span class="p">,</span>
+        <span class="n">module_param_name</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">,</span>
+    <span class="p">)</span> <span class="ow">in</span> <span class="n">iterate_module_named_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">schedule_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">module_param_name</span> <span class="ow">in</span> <span class="n">overrides</span><span class="p">:</span>
+            <span class="n">schedule_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">overrides</span><span class="p">[</span><span class="n">module_param_name</span><span class="p">])</span>
+            <span class="n">params</span> <span class="o">+=</span> <span class="p">[{</span><span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="p">],</span> <span class="o">**</span><span class="n">schedule_params</span><span class="p">}]</span>
+
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="maybe_add_gradient_clipping"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.maybe_add_gradient_clipping">[docs]</a><span class="k">def</span> <span class="nf">maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">optim</span><span class="p">):</span>  <span class="c1"># optim: the optimizer class</span>
+    <span class="c1"># detectron2 doesn&#39;t have full model gradient clipping now</span>
+    <span class="n">clip_norm_val</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">CLIP_GRADIENTS</span><span class="o">.</span><span class="n">CLIP_VALUE</span>
+    <span class="n">enable</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">CLIP_GRADIENTS</span><span class="o">.</span><span class="n">ENABLED</span>
+        <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">CLIP_GRADIENTS</span><span class="o">.</span><span class="n">CLIP_TYPE</span> <span class="o">==</span> <span class="s2">&quot;full_model&quot;</span>
+        <span class="ow">and</span> <span class="n">clip_norm_val</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+    <span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">FullModelGradientClippingOptimizer</span><span class="p">(</span><span class="n">optim</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">closure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">all_params</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_groups</span><span class="p">])</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">all_params</span><span class="p">,</span> <span class="n">clip_norm_val</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">closure</span><span class="o">=</span><span class="n">closure</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">enable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FullModelGradientClippingOptimizer</span>
+    <span class="k">return</span> <span class="n">d2_maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">optim</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_merge_dict</span><span class="p">(</span><span class="n">in_dict</span><span class="p">):</span>
+    <span class="n">ret_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dic</span> <span class="ow">in</span> <span class="n">in_dict</span><span class="p">:</span>
+        <span class="n">ret_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dic</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret_dict</span>
+
+
+<div class="viewcode-block" id="sgd"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.sgd">[docs]</a><span class="nd">@D2GO_OPTIM_MAPPER_REGISTRY</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sgd</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build an optimizer from config.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">get_optimizer_param_groups</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">)(</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BASE_LR</span><span class="p">,</span>
+        <span class="n">momentum</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">MOMENTUM</span><span class="p">,</span>
+        <span class="n">nesterov</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">NESTEROV</span><span class="p">,</span>
+        <span class="n">foreach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="adam"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.adam">[docs]</a><span class="nd">@D2GO_OPTIM_MAPPER_REGISTRY</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">adam</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build an optimizer from config.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">get_optimizer_param_groups</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">)(</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BASE_LR</span><span class="p">,</span> <span class="n">betas</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BETAS</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">EPS</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="adamw"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.adamw">[docs]</a><span class="nd">@D2GO_OPTIM_MAPPER_REGISTRY</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">adamw</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build an optimizer from config.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">get_optimizer_param_groups</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">)(</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BASE_LR</span><span class="p">,</span>
+        <span class="n">betas</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BETAS</span><span class="p">,</span>
+        <span class="n">eps</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">EPS</span><span class="p">,</span>
+        <span class="n">foreach</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">FUSED</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">fused</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">FUSED</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sgd_mt"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.sgd_mt">[docs]</a><span class="nd">@D2GO_OPTIM_MAPPER_REGISTRY</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sgd_mt</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a multi_tensor SGD optimizer that works significantly faster.</span>
+<span class="sd">    This version is expected to be the default implementation for SGD</span>
+<span class="sd">    optimizer by end of H1&#39;21. To benefit from the speedup, the number</span>
+<span class="sd">    of parameter groups needs to be reduced using `reduce_param_groups`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">get_optimizer_param_groups</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">_multi_tensor</span><span class="o">.</span><span class="n">SGD</span><span class="p">)(</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BASE_LR</span><span class="p">,</span>
+        <span class="n">momentum</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">MOMENTUM</span><span class="p">,</span>
+        <span class="n">nesterov</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">NESTEROV</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="adamw_mt"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.adamw_mt">[docs]</a><span class="nd">@D2GO_OPTIM_MAPPER_REGISTRY</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">adamw_mt</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a multi_tensor adamw optimizer that works significantly faster.</span>
+<span class="sd">    This version is expected to be the default implementation for adamw</span>
+<span class="sd">    optimizer by end of H1&#39;21. To benefit from the speedup, the number</span>
+<span class="sd">    of parameter groups needs to be reduced using `reduce_param_groups`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">get_optimizer_param_groups</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">maybe_add_gradient_clipping</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">_multi_tensor</span><span class="o">.</span><span class="n">AdamW</span><span class="p">)(</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">BASE_LR</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">EPS</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="build_optimizer_mapper"><a class="viewcode-back" href="../../../d2go.optimizer.html#d2go.optimizer.build.build_optimizer_mapper">[docs]</a><span class="k">def</span> <span class="nf">build_optimizer_mapper</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">SOLVER</span><span class="o">.</span><span class="n">OPTIMIZER</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">D2GO_OPTIM_MAPPER_REGISTRY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">())(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_param_group_str</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">y</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s2">&quot;params&quot;</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">]</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">def</span> <span class="nf">_param_groups_str</span><span class="p">(</span><span class="n">groups</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">groups</span><span class="p">):</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Param group </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">_param_group_str</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using optimizer:</span><span class="se">\n</span><span class="si">{</span><span class="n">optimizer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;optimizer parameter groups:</span><span class="se">\n</span><span class="si">{</span><span class="n">_param_groups_str</span><span class="p">(</span><span class="n">optimizer</span><span class="o">.</span><span class="n">param_groups</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">optimizer</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

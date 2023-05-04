@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.modeling.backbone.fbnet_cfg &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">d2go</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">d2go.modeling.backbone.fbnet_cfg</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for d2go.modeling.backbone.fbnet_cfg</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved</span>
+
+
+<span class="kn">from</span> <span class="nn">d2go.config</span> <span class="kn">import</span> <span class="n">CfgNode</span> <span class="k">as</span> <span class="n">CN</span>
+
+
+<div class="viewcode-block" id="add_fbnet_default_configs"><a class="viewcode-back" href="../../../../d2go.modeling.backbone.html#d2go.modeling.backbone.fbnet_cfg.add_fbnet_default_configs">[docs]</a><span class="k">def</span> <span class="nf">add_fbnet_default_configs</span><span class="p">(</span><span class="n">_C</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;FBNet options and default values&quot;&quot;&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">ARCH</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+    <span class="c1"># custom arch</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">ARCH_DEF</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">BN_TYPE</span> <span class="o">=</span> <span class="s2">&quot;bn&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">NUM_GROUPS</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># for gn usage only</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">SCALE_FACTOR</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># the output channels will be divisible by WIDTH_DIVISOR</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">WIDTH_DIVISOR</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">DW_CONV_SKIP_BN</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">DW_CONV_SKIP_RELU</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># &gt; 0 scale, == 0 skip, &lt; 0 same dimension</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">DET_HEAD_LAST_SCALE</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">DET_HEAD_BLOCKS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># overwrite the stride for the head, 0 to use original value</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">DET_HEAD_STRIDE</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># &gt; 0 scale, == 0 skip, &lt; 0 same dimension</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">KPTS_HEAD_LAST_SCALE</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">KPTS_HEAD_BLOCKS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># overwrite the stride for the head, 0 to use original value</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">KPTS_HEAD_STRIDE</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># &gt; 0 scale, == 0 skip, &lt; 0 same dimension</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">MASK_HEAD_LAST_SCALE</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">MASK_HEAD_BLOCKS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># overwrite the stride for the head, 0 to use original value</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">MASK_HEAD_STRIDE</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># 0 to use all blocks defined in arch_def</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">RPN_HEAD_BLOCKS</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">RPN_BN_TYPE</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># number of channels input to trunk</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET</span><span class="o">.</span><span class="n">STEM_IN_CHANNELS</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+<div class="viewcode-block" id="add_fbnet_v2_default_configs"><a class="viewcode-back" href="../../../../d2go.modeling.backbone.html#d2go.modeling.backbone.fbnet_cfg.add_fbnet_v2_default_configs">[docs]</a><span class="k">def</span> <span class="nf">add_fbnet_v2_default_configs</span><span class="p">(</span><span class="n">_C</span><span class="p">):</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
+
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">ARCH</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">ARCH_DEF</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># number of channels input to trunk</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">STEM_IN_CHANNELS</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">SCALE_FACTOR</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># the output channels will be divisible by WIDTH_DIVISOR</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">WIDTH_DIVISOR</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># normalization configs</span>
+    <span class="c1"># name of norm such as &quot;bn&quot;, &quot;sync_bn&quot;, &quot;gn&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">NORM</span> <span class="o">=</span> <span class="s2">&quot;bn&quot;</span>
+    <span class="c1"># for advanced use case that requries extra arguments, passing a list of</span>
+    <span class="c1"># dict such as [{&quot;num_groups&quot;: 8}, {&quot;momentum&quot;: 0.1}] (merged in given order).</span>
+    <span class="c1"># Note that string written it in .yaml will be evaluated by yacs, thus this</span>
+    <span class="c1"># node will become normal python object.</span>
+    <span class="c1"># https://github.com/rbgirshick/yacs/blob/master/yacs/config.py#L410</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">FBNET_V2</span><span class="o">.</span><span class="n">NORM_ARGS</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
+
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">IN_FEATURES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;res2&quot;</span><span class="p">,</span> <span class="s2">&quot;res3&quot;</span><span class="p">,</span> <span class="s2">&quot;res4&quot;</span><span class="p">,</span> <span class="s2">&quot;res5&quot;</span><span class="p">]</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">OUT_CHANNELS</span> <span class="o">=</span> <span class="mi">256</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">LAYERS</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">TOKEN_LS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">TOKEN_C</span> <span class="o">=</span> <span class="mi">1024</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">HEADS</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">MIN_GROUP_PLANES</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">NORM</span> <span class="o">=</span> <span class="s2">&quot;BN&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">POS_HWS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">VT_FPN</span><span class="o">.</span><span class="n">POS_N_DOWNSAMPLE</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="add_bifpn_default_configs"><a class="viewcode-back" href="../../../../d2go.modeling.backbone.html#d2go.modeling.backbone.fbnet_cfg.add_bifpn_default_configs">[docs]</a><span class="k">def</span> <span class="nf">add_bifpn_default_configs</span><span class="p">(</span><span class="n">_C</span><span class="p">):</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span> <span class="o">=</span> <span class="n">CN</span><span class="p">()</span>
+
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span><span class="o">.</span><span class="n">DEPTH_MULTIPLIER</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span><span class="o">.</span><span class="n">SCALE_FACTOR</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span><span class="o">.</span><span class="n">WIDTH_DIVISOR</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span><span class="o">.</span><span class="n">NORM</span> <span class="o">=</span> <span class="s2">&quot;bn&quot;</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span><span class="o">.</span><span class="n">NORM_ARGS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_C</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">BIFPN</span><span class="o">.</span><span class="n">TOP_BLOCK_BEFORE_FPN</span> <span class="o">=</span> <span class="kc">False</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

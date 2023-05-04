@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go package &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="d2go.checkpoint package" href="d2go.checkpoint.html" />
+    <link rel="prev" title="d2go" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">d2go</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">d2go package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.checkpoint.html">d2go.checkpoint package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.config.html">d2go.config package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.html">d2go.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.evaluation.html">d2go.evaluation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.export.html">d2go.export package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.model_zoo.html">d2go.model_zoo package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.html">d2go.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.optimizer.html">d2go.optimizer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.quantization.html">d2go.quantization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.registry.html">d2go.registry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.runner.html">d2go.runner package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.trainer.html">d2go.trainer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.html">d2go.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d2go-distributed-module">d2go.distributed module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-d2go.initializer">d2go.initializer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d2go-setup-module">d2go.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-d2go">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">d2go</a></li>
+      <li class="breadcrumb-item active">d2go package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/d2go.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="d2go-package">
+<h1>d2go package<a class="headerlink" href="#d2go-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="d2go.checkpoint.html">d2go.checkpoint package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.checkpoint.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.checkpoint.html#d2go-checkpoint-api-module">d2go.checkpoint.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.checkpoint.html#d2go-checkpoint-fsdp-checkpoint-module">d2go.checkpoint.fsdp_checkpoint module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.checkpoint.html#d2go-checkpoint-utils-module">d2go.checkpoint.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.checkpoint.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.config.html">d2go.config package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.config.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.config.html#module-d2go.config.config">d2go.config.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.config.html#module-d2go.config.utils">d2go.config.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.config.html#module-d2go.config">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.data.html">d2go.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="d2go.data.dataset_mappers.html">d2go.data.dataset_mappers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.dataset_mappers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.dataset_mappers.html#module-d2go.data.dataset_mappers.build">d2go.data.dataset_mappers.build module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.dataset_mappers.html#d2go-data-dataset-mappers-d2go-dataset-mapper-module">d2go.data.dataset_mappers.d2go_dataset_mapper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.dataset_mappers.html#d2go-data-dataset-mappers-data-reading-module">d2go.data.dataset_mappers.data_reading module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.dataset_mappers.html#d2go-data-dataset-mappers-rotated-dataset-mapper-module">d2go.data.dataset_mappers.rotated_dataset_mapper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.dataset_mappers.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.data.transforms.html">d2go.data.transforms package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-affine-module">d2go.data.transforms.affine module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-auto-aug-module">d2go.data.transforms.auto_aug module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-blur-module">d2go.data.transforms.blur module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-box-utils-module">d2go.data.transforms.box_utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-build-module">d2go.data.transforms.build module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-color-yuv-module">d2go.data.transforms.color_yuv module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-crop-module">d2go.data.transforms.crop module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-d2-native-module">d2go.data.transforms.d2_native module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#d2go-data-transforms-tensor-module">d2go.data.transforms.tensor module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.transforms.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#d2go-data-build-module">d2go.data.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#module-d2go.data.cache_util">d2go.data.cache_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#module-d2go.data.config">d2go.data.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#d2go-data-datasets-module">d2go.data.datasets module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#module-d2go.data.disk_cache">d2go.data.disk_cache module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#d2go-data-extended-coco-module">d2go.data.extended_coco module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#d2go-data-extended-lvis-module">d2go.data.extended_lvis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#module-d2go.data.keypoint_metadata_registry">d2go.data.keypoint_metadata_registry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#d2go-data-utils-module">d2go.data.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.data.html#module-d2go.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.evaluation.html">d2go.evaluation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.evaluation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.evaluation.html#d2go-evaluation-api-module">d2go.evaluation.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.evaluation.html#d2go-evaluation-evaluator-module">d2go.evaluation.evaluator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.evaluation.html#d2go-evaluation-prediction-count-evaluation-module">d2go.evaluation.prediction_count_evaluation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.evaluation.html#d2go-evaluation-sem-seg-evaluation-module">d2go.evaluation.sem_seg_evaluation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.evaluation.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.export.html">d2go.export package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.export.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.export.html#module-d2go.export.api">d2go.export.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.export.html#d2go-export-exporter-module">d2go.export.exporter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.export.html#d2go-export-torchscript-module">d2go.export.torchscript module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.export.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.model_zoo.html">d2go.model_zoo package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.model_zoo.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.model_zoo.html#d2go-model-zoo-model-zoo-module">d2go.model_zoo.model_zoo module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.model_zoo.html#module-d2go.model_zoo">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.modeling.html">d2go.modeling package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="d2go.modeling.backbone.html">d2go.modeling.backbone package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.backbone.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.backbone.html#module-d2go.modeling.backbone.fbnet_cfg">d2go.modeling.backbone.fbnet_cfg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.backbone.html#d2go-modeling-backbone-fbnet-v2-module">d2go.modeling.backbone.fbnet_v2 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.backbone.html#d2go-modeling-backbone-modules-module">d2go.modeling.backbone.modules module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.backbone.html#module-d2go.modeling.backbone">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.modeling.meta_arch.html">d2go.modeling.meta_arch package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#d2go-modeling-meta-arch-fcos-module">d2go.modeling.meta_arch.fcos module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#d2go-modeling-meta-arch-panoptic-fpn-module">d2go.modeling.meta_arch.panoptic_fpn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#d2go-modeling-meta-arch-rcnn-module">d2go.modeling.meta_arch.rcnn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#d2go-modeling-meta-arch-retinanet-module">d2go.modeling.meta_arch.retinanet module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#d2go-modeling-meta-arch-semantic-seg-module">d2go.modeling.meta_arch.semantic_seg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.meta_arch.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.modeling.modeldef.html">d2go.modeling.modeldef package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.modeldef.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.modeldef.html#d2go-modeling-modeldef-fbnet-modeldef-registry-module">d2go.modeling.modeldef.fbnet_modeldef_registry module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.modeldef.html#d2go-modeling-modeldef-modeldef-module">d2go.modeling.modeldef.modeldef module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.modeldef.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-api-module">d2go.modeling.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-distillation-module">d2go.modeling.distillation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-ema-module">d2go.modeling.ema module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-image-pooler-module">d2go.modeling.image_pooler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-kmeans-anchors-module">d2go.modeling.kmeans_anchors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-misc-module">d2go.modeling.misc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-model-freezing-utils-module">d2go.modeling.model_freezing_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-modeling-hook-module">d2go.modeling.modeling_hook module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#d2go-modeling-subclass-module">d2go.modeling.subclass module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.modeling.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.optimizer.html">d2go.optimizer package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.optimizer.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.optimizer.html#module-d2go.optimizer.build">d2go.optimizer.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.optimizer.html#module-d2go.optimizer">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.quantization.html">d2go.quantization package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.quantization.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.quantization.html#module-d2go.quantization.fx">d2go.quantization.fx module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.quantization.html#module-d2go.quantization.learnable_qat">d2go.quantization.learnable_qat module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.quantization.html#d2go-quantization-modeling-module">d2go.quantization.modeling module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.quantization.html#module-d2go.quantization.qconfig">d2go.quantization.qconfig module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.quantization.html#module-d2go.quantization">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.registry.html">d2go.registry package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.registry.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.registry.html#module-d2go.registry.bootstrap">d2go.registry.bootstrap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.registry.html#module-d2go.registry.builtin">d2go.registry.builtin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.registry.html#module-d2go.registry">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.runner.html">d2go.runner package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="d2go.runner.callbacks.html">d2go.runner.callbacks package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.runner.callbacks.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.runner.callbacks.html#d2go-runner-callbacks-quantization-module">d2go.runner.callbacks.quantization module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.runner.callbacks.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#module-d2go.runner.api">d2go.runner.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#d2go-runner-config-defaults-module">d2go.runner.config_defaults module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#d2go-runner-debug-runner-module">d2go.runner.debug_runner module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#d2go-runner-default-runner-module">d2go.runner.default_runner module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#d2go-runner-lightning-task-module">d2go.runner.lightning_task module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#d2go-runner-training-hooks-module">d2go.runner.training_hooks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.runner.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.trainer.html">d2go.trainer package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.trainer.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="d2go.trainer.lightning.html">d2go.trainer.lightning package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.trainer.lightning.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.trainer.lightning.html#d2go-trainer-lightning-training-loop-module">d2go.trainer.lightning.training_loop module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.trainer.lightning.html#module-d2go.trainer.lightning">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.trainer.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.trainer.html#d2go-trainer-api-module">d2go.trainer.api module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.trainer.html#d2go-trainer-fsdp-module">d2go.trainer.fsdp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.trainer.html#module-d2go.trainer.helper">d2go.trainer.helper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.trainer.html#module-d2go.trainer">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="d2go.utils.html">d2go.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="d2go.utils.testing.html">d2go.utils.testing package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-data-loader-helper-module">d2go.utils.testing.data_loader_helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-helper-module">d2go.utils.testing.helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-lightning-test-module-module">d2go.utils.testing.lightning_test_module module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-lightning-train-helper-module">d2go.utils.testing.lightning_train_helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-meta-arch-helper-module">d2go.utils.testing.meta_arch_helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-rcnn-helper-module">d2go.utils.testing.rcnn_helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#d2go-utils-testing-sem-seg-helper-module">d2go.utils.testing.sem_seg_helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.testing.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-abnormal-checker-module">d2go.utils.abnormal_checker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-demo-predictor-module">d2go.utils.demo_predictor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-ema-state-module">d2go.utils.ema_state module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-flop-calculator-module">d2go.utils.flop_calculator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-helper-module">d2go.utils.helper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-launch-environment-module">d2go.utils.launch_environment module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-logging-module">d2go.utils.logging module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-misc-module">d2go.utils.misc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-tensorboard-log-util-module">d2go.utils.tensorboard_log_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-validation-monitor-module">d2go.utils.validation_monitor module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#d2go-utils-visualization-module">d2go.utils.visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="d2go.utils.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="d2go-distributed-module">
+<h2>d2go.distributed module<a class="headerlink" href="#d2go-distributed-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-d2go.initializer">
+<span id="d2go-initializer-module"></span><h2>d2go.initializer module<a class="headerlink" href="#module-d2go.initializer" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="d2go.initializer.initialize_all">
+<span class="sig-prename descclassname"><span class="pre">d2go.initializer.</span></span><span class="sig-name descname"><span class="pre">initialize_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boostrap_registries</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/d2go/initializer.html#initialize_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.initializer.initialize_all" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="d2go-setup-module">
+<h2>d2go.setup module<a class="headerlink" href="#d2go-setup-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-d2go">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-d2go" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="d2go" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="d2go.checkpoint.html" class="btn btn-neutral float-right" title="d2go.checkpoint package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.export.api &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">d2go</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">d2go.export.api</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for d2go.export.api</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.common.misc.file_utils</span> <span class="kn">import</span> <span class="n">make_temp_directory</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.common.misc.registry</span> <span class="kn">import</span> <span class="n">Registry</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.predictor.api</span> <span class="kn">import</span> <span class="n">FuncInfo</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.predictor.builtin_functions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IdentityPostprocess</span><span class="p">,</span>
+    <span class="n">IdentityPreprocess</span><span class="p">,</span>
+    <span class="n">NaiveRunFunc</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">final</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># If final decorator not available when using older python version, replace with the</span>
+    <span class="c1"># dummy implementation that does nothing.</span>
+    <span class="k">def</span> <span class="nf">final</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+
+<div class="viewcode-block" id="PredictorExportConfig"><a class="viewcode-back" href="../../../d2go.export.html#d2go.export.api.PredictorExportConfig">[docs]</a><span class="k">class</span> <span class="nc">PredictorExportConfig</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Storing information for exporting a predictor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (any nested iterable structure of nn.Module): the model(s) to be exported</span>
+<span class="sd">            (via tracing/onnx or scripting). This can be sub-model(s) when the predictor</span>
+<span class="sd">            consists of multiple models in deployable format, and/or pre/post processing</span>
+<span class="sd">            is excluded due to requirement of tracing or hardware incompatibility.</span>
+<span class="sd">        data_generator (Callable): a function to generate all data needed for tracing,</span>
+<span class="sd">            such that data = data_generator(x), the returned data has the same nested</span>
+<span class="sd">            structure as model. The data for each model will be treated as positional</span>
+<span class="sd">            arguments, i.e. model(*data).</span>
+<span class="sd">        model_export_kwargs (Dict): additional kwargs when exporting each sub-model, it</span>
+<span class="sd">            follows the same nested structure as the model, and may contains information</span>
+<span class="sd">            such as scriptable.</span>
+
+<span class="sd">        preprocess_info (FuncInfo): info for predictor&#39;s preprocess</span>
+<span class="sd">        postprocess_info (FuncInfo): info for predictor&#39;s postprocess</span>
+<span class="sd">        run_func_info (FuncInfo): info for predictor&#39;s run_fun</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]]</span>
+    <span class="n">data_generator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model_export_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model_export_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">preprocess_info</span><span class="p">:</span> <span class="n">FuncInfo</span> <span class="o">=</span> <span class="n">FuncInfo</span><span class="o">.</span><span class="n">gen_func_info</span><span class="p">(</span><span class="n">IdentityPreprocess</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{})</span>
+    <span class="n">postprocess_info</span><span class="p">:</span> <span class="n">FuncInfo</span> <span class="o">=</span> <span class="n">FuncInfo</span><span class="o">.</span><span class="n">gen_func_info</span><span class="p">(</span><span class="n">IdentityPostprocess</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{})</span>
+    <span class="n">run_func_info</span><span class="p">:</span> <span class="n">FuncInfo</span> <span class="o">=</span> <span class="n">FuncInfo</span><span class="o">.</span><span class="n">gen_func_info</span><span class="p">(</span><span class="n">NaiveRunFunc</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{})</span></div>
+
+
+<div class="viewcode-block" id="ModelExportMethod"><a class="viewcode-back" href="../../../d2go.export.html#d2go.export.api.ModelExportMethod">[docs]</a><span class="k">class</span> <span class="nc">ModelExportMethod</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for &quot;model export method&quot;. Each model export method can export a pytorch</span>
+<span class="sd">    model to a certain deployable format, such as torchscript or caffe2. It consists</span>
+<span class="sd">    with `export` and `load` methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ModelExportMethod.export"><a class="viewcode-back" href="../../../d2go.export.html#d2go.export.api.ModelExportMethod.export">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">input_args</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">export_method</span><span class="p">,</span> <span class="o">**</span><span class="n">export_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the model to deployable format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (nn.Module): a pytorch model to export</span>
+<span class="sd">            input_args (Tuple[Any]): inputs of model, called as model(*input_args)</span>
+<span class="sd">            save_path (str): directory where the model will be exported</span>
+<span class="sd">            export_method (str): string name for the export method</span>
+<span class="sd">            export_kwargs (Dict): additional parameters for exporting model defined</span>
+<span class="sd">                by each model export method.</span>
+<span class="sd">        Return:</span>
+<span class="sd">            load_kwargs (Dict): additional information (besides save_path) needed in</span>
+<span class="sd">                order to load the exported model. This needs to be JSON serializable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ModelExportMethod.load"><a class="viewcode-back" href="../../../d2go.export.html#d2go.export.api.ModelExportMethod.load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="o">**</span><span class="n">load_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the exported model back for inference.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_path (str): directory where the model is stored.</span>
+<span class="sd">            load_kwargs (Dict): addtional information to load the exported model.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            model (nn.Module): a nn.Module (often time a wrapper for non torchscript</span>
+<span class="sd">                types like caffe2), it works the same as the original pytorch model,</span>
+<span class="sd">                i.e. getting the same output when called as model(*input_args)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ModelExportMethod.test_export_and_load"><a class="viewcode-back" href="../../../d2go.export.html#d2go.export.api.ModelExportMethod.test_export_and_load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@final</span>
+    <span class="k">def</span> <span class="nf">test_export_and_load</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">input_args</span><span class="p">,</span> <span class="n">export_method</span><span class="p">,</span> <span class="n">export_kwargs</span><span class="p">,</span> <span class="n">output_checker</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Illustrate the life-cycle of export and load, used for testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">make_temp_directory</span><span class="p">(</span><span class="s2">&quot;test_export_and_load&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">save_path</span><span class="p">:</span>
+            <span class="c1"># run the orginal model</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">),</span> <span class="n">model</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_args</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)),</span> <span class="n">input_args</span>
+            <span class="n">original_output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">input_args</span><span class="p">)</span>
+            <span class="c1"># export the model</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>  <span class="c1"># TODO: decide where eval() should be called</span>
+            <span class="n">load_kwargs</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">input_args</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">export_method</span><span class="p">,</span> <span class="o">**</span><span class="n">export_kwargs</span>
+            <span class="p">)</span>
+            <span class="c1"># sanity check for load_kwargs</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">load_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="n">load_kwargs</span>
+            <span class="k">assert</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">load_kwargs</span><span class="p">),</span> <span class="n">load_kwargs</span>
+            <span class="c1"># loaded model back</span>
+            <span class="n">loaded_model</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="o">**</span><span class="n">load_kwargs</span><span class="p">)</span>
+            <span class="c1"># run the loaded model</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded_model</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">),</span> <span class="n">loaded_model</span>
+            <span class="n">new_output</span> <span class="o">=</span> <span class="n">loaded_model</span><span class="p">(</span><span class="o">*</span><span class="n">input_args</span><span class="p">)</span>
+            <span class="c1"># compare outputs</span>
+            <span class="n">output_checker</span><span class="p">(</span><span class="n">new_output</span><span class="p">,</span> <span class="n">original_output</span><span class="p">)</span></div></div>
+
+
+<span class="n">ModelExportMethodRegistry</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;ModelExportMethod&quot;</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

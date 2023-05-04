@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.registry.bootstrap &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">d2go</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">d2go.registry.bootstrap</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for d2go.registry.bootstrap</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved</span>
+
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">builtins</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.common.misc.py</span> <span class="kn">import</span> <span class="n">dynamic_import</span><span class="p">,</span> <span class="n">MoreMagicMock</span>
+<span class="kn">from</span> <span class="nn">mobile_cv.common.misc.registry</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CLASS_OR_FUNCTION_TYPES</span><span class="p">,</span>
+    <span class="n">LazyRegisterable</span><span class="p">,</span>
+    <span class="n">Registry</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">orig_import</span> <span class="o">=</span> <span class="n">builtins</span><span class="o">.</span><span class="n">__import__</span>
+<span class="n">orig_open</span> <span class="o">=</span> <span class="n">builtins</span><span class="o">.</span><span class="n">open</span>
+<span class="n">orig__register</span> <span class="o">=</span> <span class="n">Registry</span><span class="o">.</span><span class="n">_register</span>
+<span class="n">_INSIDE_BOOTSTRAP</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">_IS_BOOTSTRAPPED</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">_BOOTSTRAP_PACKAGE</span> <span class="o">=</span> <span class="s2">&quot;d2go.registry._bootstrap&quot;</span>
+<span class="n">_BOOTSTRAP_CACHE_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;registry_bootstrap.v1.yaml&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_log</span><span class="p">(</span><span class="n">lvl</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">_VERBOSE_LEVEL</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">_VERBOSE_LEVEL</span> <span class="o">&gt;=</span> <span class="n">lvl</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+<span class="c1"># Simple version copied from fvcore/iopath</span>
+<span class="k">def</span> <span class="nf">_get_cache_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/.torch/d2go_cache&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+        <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s2">&quot;d2go_cache&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2"> is not accessible! Using </span><span class="si">{</span><span class="n">tmp_dir</span><span class="si">}</span><span class="s2"> instead!&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">tmp_dir</span>
+    <span class="k">return</span> <span class="n">cache_dir</span>
+
+
+<span class="k">class</span> <span class="nc">_catchtime</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+
+
+<span class="k">def</span> <span class="nf">_match</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module_full_name</span><span class="p">,</span> <span class="n">match_submodule</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">module_full_name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">match_submodule</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">module_full_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_match_any</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module_full_names</span><span class="p">,</span> <span class="n">match_submodule</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="n">_match</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module_full_name</span><span class="p">,</span> <span class="n">match_submodule</span><span class="o">=</span><span class="n">match_submodule</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">module_full_name</span> <span class="ow">in</span> <span class="n">module_full_names</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_import_mock</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">globals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="p">(),</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="n">use_orig_import</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># enable some first-party packages</span>
+    <span class="k">if</span> <span class="n">_match_any</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="p">[</span>
+            <span class="c1"># allow using pdb during patch</span>
+            <span class="s2">&quot;pdb&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;readline&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;linecache&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reprlib&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;io&quot;</span><span class="p">,</span>
+            <span class="c1"># allow using builtins.__import__</span>
+            <span class="s2">&quot;builtins&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="n">use_orig_import</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># enable some known third-party packages, these pacakges might have been imported</span>
+    <span class="k">if</span> <span class="n">_match_any</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="p">[</span>
+            <span class="c1"># &quot;torch&quot;,</span>
+            <span class="c1"># &quot;numpy&quot;,</span>
+            <span class="c1"># &quot;mobile_cv.arch.fbnet_v2.modeldef_utils&quot;,</span>
+        <span class="p">],</span>
+    <span class="p">):</span>
+        <span class="n">use_orig_import</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># enable modules under d2go.registry</span>
+    <span class="k">if</span> <span class="n">_match</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;d2go.registry&quot;</span><span class="p">,</span> <span class="n">match_submodule</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">use_orig_import</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">use_orig_import</span><span class="p">:</span>
+        <span class="c1"># import as normal</span>
+        <span class="k">return</span> <span class="n">orig_import</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">globals</span><span class="p">,</span> <span class="nb">locals</span><span class="p">,</span> <span class="n">fromlist</span><span class="o">=</span><span class="n">fromlist</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># return a Mock instead of making a real import</span>
+        <span class="n">_log</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;mock import: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">; fromlist=</span><span class="si">{</span><span class="n">fromlist</span><span class="si">}</span><span class="s2">; level=</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">MoreMagicMock</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">m</span>
+
+
+<span class="k">def</span> <span class="nf">_open_mock</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">MoreMagicMock</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_register_mock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert `obj` to LazyRegisterable&quot;&quot;&quot;</span>
+
+    <span class="c1"># Instead of register the (possibly mocked) object which is created under the</span>
+    <span class="c1"># &quot;fake&quot; package _BOOTSTRAP_PACKAGE, register a lazy-object (i.e. a string) pointing</span>
+    <span class="c1"># to its original (possibly un-imported) module.</span>
+    <span class="k">def</span> <span class="nf">_resolve_real_module</span><span class="p">(</span><span class="n">module_in_bootstrap_package</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">module_in_bootstrap_package</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_BOOTSTRAP_PACKAGE</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">orig_module</span> <span class="o">=</span> <span class="n">module_in_bootstrap_package</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">_BOOTSTRAP_PACKAGE</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">orig_module</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">MoreMagicMock</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">obj</span><span class="o">.</span><span class="n">mocked_obj_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">obj</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">mocked_obj_info</span><span class="p">[</span><span class="s2">&quot;__name__&quot;</span><span class="p">]</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">LazyRegisterable</span><span class="p">(</span>
+            <span class="n">module</span><span class="o">=</span><span class="n">_resolve_real_module</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">mocked_obj_info</span><span class="p">[</span><span class="s2">&quot;__module__&quot;</span><span class="p">]),</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">mocked_obj_info</span><span class="p">[</span><span class="s2">&quot;__qualname__&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">LazyRegisterable</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">CLASS_OR_FUNCTION_TYPES</span><span class="p">),</span> <span class="n">obj</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">LazyRegisterable</span><span class="p">(</span>
+            <span class="n">module</span><span class="o">=</span><span class="n">_resolve_real_module</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__module__</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="vm">__qualname__</span>
+        <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">LazyRegisterable</span><span class="p">)</span>
+    <span class="c1"># During bootstrap, it&#39;s possible that the object is already registered</span>
+    <span class="c1"># (as non-lazy), because importing a library first and then bootstramp it. Simply</span>
+    <span class="c1"># skip the lazy-registration.</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">LazyRegisterable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="n">obj</span><span class="o">.</span><span class="n">module</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">):</span>
+            <span class="n">_log</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2"> has already registered as </span><span class="si">{</span><span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">, skip...&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+    <span class="n">orig__register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">_bootstrap_patch</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">_INSIDE_BOOTSTRAP</span>
+
+    <span class="n">builtins</span><span class="o">.</span><span class="n">__import__</span> <span class="o">=</span> <span class="n">_import_mock</span>
+    <span class="n">builtins</span><span class="o">.</span><span class="n">open</span> <span class="o">=</span> <span class="n">_open_mock</span>
+    <span class="n">Registry</span><span class="o">.</span><span class="n">_register</span> <span class="o">=</span> <span class="n">_register_mock</span>
+    <span class="n">_INSIDE_BOOTSTRAP</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">builtins</span><span class="o">.</span><span class="n">__import__</span> <span class="o">=</span> <span class="n">orig_import</span>
+        <span class="n">builtins</span><span class="o">.</span><span class="n">open</span> <span class="o">=</span> <span class="n">orig_open</span>
+        <span class="n">Registry</span><span class="o">.</span><span class="n">_register</span> <span class="o">=</span> <span class="n">orig__register</span>
+        <span class="n">_INSIDE_BOOTSTRAP</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">_get_registered_names</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Return the currently registered names for each registry&quot;&quot;&quot;</span>
+    <span class="c1"># NOTE: currently only support D2Go&#39;s builtin registry module, which can be extended</span>
+    <span class="c1"># in future.</span>
+    <span class="kn">import</span> <span class="nn">d2go.registry.builtin</span>
+
+    <span class="n">modules</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">d2go</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">builtin</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">registered</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span>
+        <span class="n">registered_in_module</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">module</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_names</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Registry</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">registered</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">registered_in_module</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">registered</span>
+
+
+<div class="viewcode-block" id="BootstrapStatus"><a class="viewcode-back" href="../../../d2go.registry.html#d2go.registry.bootstrap.BootstrapStatus">[docs]</a><span class="k">class</span> <span class="nc">BootstrapStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">CACHED</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">FULLY_IMPORTED</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">PARTIALLY_IMPORTED</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">FAILED</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+<div class="viewcode-block" id="CachedResult"><a class="viewcode-back" href="../../../d2go.registry.html#d2go.registry.bootstrap.CachedResult">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">CachedResult</span><span class="p">:</span>
+    <span class="n">sha1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">registered</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># string representation of BootstrapStatus</span></div>
+
+
+<span class="k">def</span> <span class="nf">_bootstrap_file</span><span class="p">(</span>
+    <span class="n">rel_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">catch_exception</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">cached_result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CachedResult</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">CachedResult</span><span class="p">,</span> <span class="n">BootstrapStatus</span><span class="p">]:</span>
+    <span class="c1"># convert relative path to full module name</span>
+    <span class="c1"># eg. &quot;.../d2go/a/b/c.py&quot; -&gt; &quot;d2go.a.b.c&quot;</span>
+    <span class="c1"># eg. &quot;.../d2go/a/b/__init__.py&quot; -&gt; &quot;d2go.a.b&quot;</span>
+    <span class="n">package_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s2">&quot;d2go&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_root</span><span class="p">,</span> <span class="n">rel_path</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">rel_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">)</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">rel_path</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/__init__&quot;</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;/__init__&quot;</span><span class="p">)]</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+    <span class="n">exec_globals</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+        <span class="c1"># execute in a &quot;fake&quot; package to minimize potential side effect</span>
+        <span class="s2">&quot;__name__&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_BOOTSTRAP_PACKAGE</span><span class="p">,</span> <span class="n">module</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">with</span> <span class="n">_catchtime</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cached_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">file_hash</span> <span class="o">==</span> <span class="n">cached_result</span><span class="o">.</span><span class="n">sha1</span><span class="p">:</span>
+            <span class="n">_log</span><span class="p">(</span>
+                <span class="mi">2</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Hash </span><span class="si">{</span><span class="n">file_hash</span><span class="si">}</span><span class="s2"> matches, lazy registering cached registerables ...&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">registerables</span> <span class="o">=</span> <span class="n">cached_result</span><span class="o">.</span><span class="n">registered</span>
+            <span class="k">for</span> <span class="n">registry_module_dot_name</span><span class="p">,</span> <span class="n">names_to_register</span> <span class="ow">in</span> <span class="n">registerables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">registry</span> <span class="o">=</span> <span class="n">dynamic_import</span><span class="p">(</span><span class="n">registry_module_dot_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names_to_register</span><span class="p">:</span>
+                    <span class="c1"># we only store the registered name in the cache, here we know the</span>
+                    <span class="c1"># module of bootstrapped file, which should be sufficient.</span>
+                    <span class="n">registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">LazyRegisterable</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">cached_result</span><span class="p">,</span> <span class="n">BootstrapStatus</span><span class="o">.</span><span class="n">CACHED</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="c1"># HACK: convert multiple inheritance to single inheritance, this is needed</span>
+        <span class="c1"># because current implementation of MoreMagicMock can&#39;t handle this well.</span>
+        <span class="c1"># eg. `class MyClass(MyMixin, nn.Module)` -&gt; `class MyClass(MyMixin)`</span>
+        <span class="k">def</span> <span class="nf">_truncate_multiple_inheritance</span><span class="p">(</span><span class="n">ast_tree</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">stmt</span> <span class="ow">in</span> <span class="n">ast_tree</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">ClassDef</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stmt</span><span class="o">.</span><span class="n">bases</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">stmt</span><span class="o">.</span><span class="n">bases</span> <span class="o">=</span> <span class="n">stmt</span><span class="o">.</span><span class="n">bases</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">stmt</span><span class="o">.</span><span class="n">keywords</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                    <span class="n">_truncate_multiple_inheritance</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+
+        <span class="n">_truncate_multiple_inheritance</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+    <span class="n">_log</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Parsing AST takes </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="si">}</span><span class="s2"> sec&quot;</span><span class="p">)</span>
+
+    <span class="n">prev_registered</span> <span class="o">=</span> <span class="n">_get_registered_names</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">_catchtime</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">_bootstrap_patch</span><span class="p">():</span>
+                <span class="n">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">),</span> <span class="n">exec_globals</span><span class="p">)</span>  <span class="c1"># noqa</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">BootstrapStatus</span><span class="o">.</span><span class="n">FULLY_IMPORTED</span>
+        <span class="k">except</span> <span class="n">_BootstrapBreakException</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">BootstrapStatus</span><span class="o">.</span><span class="n">PARTIALLY_IMPORTED</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">catch_exception</span><span class="p">:</span>
+                <span class="n">_log</span><span class="p">(</span>
+                    <span class="mi">1</span><span class="p">,</span>
+                    <span class="s2">&quot;Encountered the following error during bootstrap:&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">e</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">BootstrapStatus</span><span class="o">.</span><span class="n">FAILED</span>
+    <span class="n">_log</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Execute file takes </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">time</span><span class="si">}</span><span class="s2"> sec&quot;</span><span class="p">)</span>
+
+    <span class="c1"># compare and get the newly registered</span>
+    <span class="n">cur_registered</span> <span class="o">=</span> <span class="n">_get_registered_names</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">cur_registered</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">prev_registered</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">newly_registered</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cur_registered</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">prev_registered</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cur_registered</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="p">}</span>
+    <span class="n">newly_registered</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">newly_registered</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">CachedResult</span><span class="p">(</span>
+        <span class="n">sha1</span><span class="o">=</span><span class="n">file_hash</span><span class="p">,</span>
+        <span class="n">registered</span><span class="o">=</span><span class="n">newly_registered</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">status</span>
+
+
+<span class="k">class</span> <span class="nc">_BootstrapBreakException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="break_bootstrap"><a class="viewcode-back" href="../../../d2go.registry.html#d2go.registry.bootstrap.break_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">break_bootstrap</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In case the file can&#39;t be perfectly executed by `_bootstrap_file`, users can call</span>
+<span class="sd">    this function to break the process. Because the remaining content in the file will</span>
+<span class="sd">    be skipped, avoid using registration statement after calling this function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">_INSIDE_BOOTSTRAP</span><span class="p">:</span>
+        <span class="c1"># raise a special exception which will be catched later</span>
+        <span class="k">raise</span> <span class="n">_BootstrapBreakException</span><span class="p">()</span>
+
+    <span class="c1"># non-op outside of bootstrap</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="lazy_on_bootstrap"><a class="viewcode-back" href="../../../d2go.registry.html#d2go.registry.bootstrap.lazy_on_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">lazy_on_bootstrap</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A decorator to mark a function as &quot;lazy&quot; during bootstrap, such that the decorated</span>
+<span class="sd">    function will skip the execution and immediately return a MagicMock object during</span>
+<span class="sd">    the bootstrap (the decorator is a non-op outside of bootstrap). This can be used to</span>
+<span class="sd">    hide un-executable code (usually related to import-time computation) during the</span>
+<span class="sd">    bootstrap.</span>
+
+<span class="sd">    For registration related import-time computation, please consider using the</span>
+<span class="sd">    `LazyRegisterable` since it will also save time for the normal import.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_INSIDE_BOOTSTRAP</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MoreMagicMock</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapped</span></div>
+
+
+<span class="k">def</span> <span class="nf">_load_cached_results</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CachedResult</span><span class="p">]:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Wrong format: </span><span class="si">{</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="n">CachedResult</span><span class="p">(</span><span class="o">**</span><span class="n">result_dic</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">result_dic</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span> <span class="nf">_dump_cached_results</span><span class="p">(</span><span class="n">cached_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CachedResult</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">results_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="n">asdict</span><span class="p">(</span><span class="n">result_dic</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">result_dic</span> <span class="ow">in</span> <span class="n">cached_results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="n">dumped</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">results_dict</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dumped</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="bootstrap_registries"><a class="viewcode-back" href="../../../d2go.registry.html#d2go.registry.bootstrap.bootstrap_registries">[docs]</a><span class="k">def</span> <span class="nf">bootstrap_registries</span><span class="p">(</span><span class="n">enable_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">catch_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bootstrap all registries so that all objects are effectively registered.</span>
+
+<span class="sd">    This function will &quot;import&quot; all the files from certain locations (eg. d2go package)</span>
+<span class="sd">    and look for a set of known registries (eg. d2go&#39;s builtin registries). The &quot;import&quot;</span>
+<span class="sd">    should not have any side effect, which is achieved by mocking builtin.__import__.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">_IS_BOOTSTRAPPED</span>
+    <span class="k">if</span> <span class="n">_IS_BOOTSTRAPPED</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Registries are already bootstrapped, skipped!&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">_INSIDE_BOOTSTRAP</span><span class="p">:</span>
+        <span class="n">_log</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;calling bootstrap_registries() inside bootstrap process, skip ...&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+
+    <span class="c1"># load cached bootstrap results if exist</span>
+    <span class="n">cached_bootstrap_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CachedResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">enable_cache</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_get_cache_dir</span><span class="p">(),</span> <span class="n">_BOOTSTRAP_CACHE_FILENAME</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading bootstrap cache at </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> ...&quot;</span><span class="p">)</span>
+            <span class="n">cached_bootstrap_results</span> <span class="o">=</span> <span class="n">_load_cached_results</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Can&#39;t find the bootstrap cache at </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">, start from scratch&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># locate all the files under d2go package</span>
+    <span class="c1"># NOTE: we may extend to support user-defined locations if necessary</span>
+    <span class="n">d2go_root</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s2">&quot;d2go&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start bootstrapping for d2go_root: </span><span class="si">{</span><span class="n">d2go_root</span><span class="si">}</span><span class="s2"> ...&quot;</span><span class="p">)</span>
+    <span class="n">all_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">d2go_root</span><span class="si">}</span><span class="s2">/**/*.py&quot;</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">all_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">d2go_root</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_files</span><span class="p">]</span>
+
+    <span class="n">new_bootstrap_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CachedResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">files_per_status</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">time_per_file</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">all_files</span><span class="p">:</span>
+        <span class="n">_log</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;bootstrap for file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">cached_result</span> <span class="o">=</span> <span class="n">cached_bootstrap_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">_catchtime</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">_bootstrap_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">catch_exception</span><span class="p">,</span> <span class="n">cached_result</span><span class="p">)</span>
+        <span class="n">new_bootstrap_results</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="n">files_per_status</span><span class="p">[</span><span class="n">status</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">time_per_file</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">time</span>
+
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="n">status_breakdown</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">files_per_status</span><span class="p">[</span><span class="n">status</span><span class="p">])</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">BootstrapStatus</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Finished bootstrapping for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> files (</span><span class="si">{</span><span class="n">status_breakdown</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; in </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">exception_files</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">filename</span>
+        <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">new_bootstrap_results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">BootstrapStatus</span><span class="o">.</span><span class="n">FAILED</span><span class="o">.</span><span class="n">name</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exception_files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Found exception for the following </span><span class="si">{}</span><span class="s2"> files (either during this bootstrap&quot;</span>
+            <span class="s2">&quot; run or from previous cached result), registration inside those files&quot;</span>
+            <span class="s2">&quot; might not work!</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">exception_files</span><span class="p">),</span>
+                <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">exception_files</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Log slowest Top-N files</span>
+    <span class="n">TOP_N</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">_log</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Top-</span><span class="si">{</span><span class="n">TOP_N</span><span class="si">}</span><span class="s2"> slowest files during bootstrap:&quot;</span><span class="p">)</span>
+    <span class="n">all_time</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">d2go_root</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">time_per_file</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_time</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="o">-</span><span class="n">TOP_N</span><span class="p">:]:</span>
+        <span class="n">_log</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">enable_cache</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_get_cache_dir</span><span class="p">(),</span> <span class="n">_BOOTSTRAP_CACHE_FILENAME</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing updated bootstrap results to </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> ...&quot;</span><span class="p">)</span>
+        <span class="n">_dump_cached_results</span><span class="p">(</span><span class="n">new_bootstrap_results</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">_IS_BOOTSTRAPPED</span> <span class="o">=</span> <span class="kc">True</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

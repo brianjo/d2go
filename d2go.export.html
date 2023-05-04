@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>d2go.export package &mdash; D2Go  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="d2go.model_zoo package" href="d2go.model_zoo.html" />
+    <link rel="prev" title="d2go.evaluation package" href="d2go.evaluation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            D2Go
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">d2go</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="d2go.html">d2go package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="d2go.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="d2go.checkpoint.html">d2go.checkpoint package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.config.html">d2go.config package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.data.html">d2go.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.evaluation.html">d2go.evaluation package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">d2go.export package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.model_zoo.html">d2go.model_zoo package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.modeling.html">d2go.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.optimizer.html">d2go.optimizer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.quantization.html">d2go.quantization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.registry.html">d2go.registry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.runner.html">d2go.runner package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.trainer.html">d2go.trainer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="d2go.utils.html">d2go.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#d2go-distributed-module">d2go.distributed module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#module-d2go.initializer">d2go.initializer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#d2go-setup-module">d2go.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="d2go.html#module-d2go">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">D2Go</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">d2go</a></li>
+          <li class="breadcrumb-item"><a href="d2go.html">d2go package</a></li>
+      <li class="breadcrumb-item active">d2go.export package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/d2go.export.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="d2go-export-package">
+<h1>d2go.export package<a class="headerlink" href="#d2go-export-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-d2go.export.api">
+<span id="d2go-export-api-module"></span><h2>d2go.export.api module<a class="headerlink" href="#module-d2go.export.api" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="d2go.export.api.ModelExportMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">d2go.export.api.</span></span><span class="sig-name descname"><span class="pre">ModelExportMethod</span></span><a class="reference internal" href="_modules/d2go/export/api.html#ModelExportMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.export.api.ModelExportMethod" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for “model export method”. Each model export method can export a pytorch
+model to a certain deployable format, such as torchscript or caffe2. It consists
+with <cite>export</cite> and <cite>load</cite> methods.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.export.api.ModelExportMethod.export">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export_method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">export_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/export/api.html#ModelExportMethod.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.export.api.ModelExportMethod.export" title="Permalink to this definition"></a></dt>
+<dd><p>Export the model to deployable format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) – a pytorch model to export</p></li>
+<li><p><strong>input_args</strong> (<em>Tuple</em><em>[</em><em>Any</em><em>]</em>) – inputs of model, called as model(<a href="#id1"><span class="problematic" id="id2">*</span></a>input_args)</p></li>
+<li><p><strong>save_path</strong> (<em>str</em>) – directory where the model will be exported</p></li>
+<li><p><strong>export_method</strong> (<em>str</em>) – string name for the export method</p></li>
+<li><p><strong>export_kwargs</strong> (<em>Dict</em>) – additional parameters for exporting model defined
+by each model export method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>additional information (besides save_path) needed in</dt><dd><p>order to load the exported model. This needs to be JSON serializable.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>load_kwargs (Dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.export.api.ModelExportMethod.load">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">load_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/export/api.html#ModelExportMethod.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.export.api.ModelExportMethod.load" title="Permalink to this definition"></a></dt>
+<dd><p>Load the exported model back for inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save_path</strong> (<em>str</em>) – directory where the model is stored.</p></li>
+<li><p><strong>load_kwargs</strong> (<em>Dict</em>) – addtional information to load the exported model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>a nn.Module (often time a wrapper for non torchscript</dt><dd><p>types like caffe2), it works the same as the original pytorch model,
+i.e. getting the same output when called as model(<a href="#id3"><span class="problematic" id="id4">*</span></a>input_args)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>model (nn.Module)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="d2go.export.api.ModelExportMethod.test_export_and_load">
+<em class="property"><span class="pre">final</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_export_and_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_checker</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/export/api.html#ModelExportMethod.test_export_and_load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.export.api.ModelExportMethod.test_export_and_load" title="Permalink to this definition"></a></dt>
+<dd><p>Illustrate the life-cycle of export and load, used for testing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">d2go.export.api.</span></span><span class="sig-name descname"><span class="pre">PredictorExportConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Module</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Module</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_generator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_export_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_export_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocess_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FuncInfo</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FuncInfo(name='mobile_cv.predictor.builtin_functions.IdentityPreprocess',</span> <span class="pre">params={})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postprocess_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FuncInfo</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FuncInfo(name='mobile_cv.predictor.builtin_functions.IdentityPostprocess',</span> <span class="pre">params={})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_func_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FuncInfo</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">FuncInfo(name='mobile_cv.predictor.builtin_functions.NaiveRunFunc',</span> <span class="pre">params={})</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/d2go/export/api.html#PredictorExportConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#d2go.export.api.PredictorExportConfig" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">NamedTuple</span></code></p>
+<p>Storing information for exporting a predictor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>any nested iterable structure of nn.Module</em>) – the model(s) to be exported
+(via tracing/onnx or scripting). This can be sub-model(s) when the predictor
+consists of multiple models in deployable format, and/or pre/post processing
+is excluded due to requirement of tracing or hardware incompatibility.</p></li>
+<li><p><strong>data_generator</strong> (<em>Callable</em>) – a function to generate all data needed for tracing,
+such that data = data_generator(x), the returned data has the same nested
+structure as model. The data for each model will be treated as positional
+arguments, i.e. model(<a href="#id5"><span class="problematic" id="id6">*</span></a>data).</p></li>
+<li><p><strong>model_export_kwargs</strong> (<em>Dict</em>) – additional kwargs when exporting each sub-model, it
+follows the same nested structure as the model, and may contains information
+such as scriptable.</p></li>
+<li><p><strong>preprocess_info</strong> (<em>FuncInfo</em>) – info for predictor’s preprocess</p></li>
+<li><p><strong>postprocess_info</strong> (<em>FuncInfo</em>) – info for predictor’s postprocess</p></li>
+<li><p><strong>run_func_info</strong> (<em>FuncInfo</em>) – info for predictor’s run_fun</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.data_generator">
+<span class="sig-name descname"><span class="pre">data_generator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.data_generator" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Module</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Module</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.model" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.model_export_kwargs">
+<span class="sig-name descname"><span class="pre">model_export_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.model_export_kwargs" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.model_export_method">
+<span class="sig-name descname"><span class="pre">model_export_method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.model_export_method" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.postprocess_info">
+<span class="sig-name descname"><span class="pre">postprocess_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FuncInfo</span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.postprocess_info" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.preprocess_info">
+<span class="sig-name descname"><span class="pre">preprocess_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FuncInfo</span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.preprocess_info" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="d2go.export.api.PredictorExportConfig.run_func_info">
+<span class="sig-name descname"><span class="pre">run_func_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FuncInfo</span></em><a class="headerlink" href="#d2go.export.api.PredictorExportConfig.run_func_info" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="d2go-export-exporter-module">
+<h2>d2go.export.exporter module<a class="headerlink" href="#d2go-export-exporter-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="d2go-export-torchscript-module">
+<h2>d2go.export.torchscript module<a class="headerlink" href="#d2go-export-torchscript-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="d2go.evaluation.html" class="btn btn-neutral float-left" title="d2go.evaluation package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="d2go.model_zoo.html" class="btn btn-neutral float-right" title="d2go.model_zoo package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Meta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
